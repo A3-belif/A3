@@ -1,0 +1,259 @@
+# 2019年国际双创实践周学习总结报告
+
+## 电子信息工程学院   学号：18020100135  姓名：安珊
+
+##一、国际双创实践周参与情况
+    报名参加了由Damo王老师主讲的开源硬件实战课程
+    课程为期四天，总学时16学时
+### 
+| 日期  | 内容 |  作业  |
+| --------   | -----:  | :----:  |
+| 0702      | 入门 |了解创客思想。创建github账号，安装并了解arduino\fritzing\processing等三个软件 |
+| 0703      |  Arduino编程   |   学习morse代码，认识学习库函数形   |
+| 0704      |   认识电子院前及操作  | 了解小车代码和电路图，了解数码管代码和电路图 |
+|0705|总结|编写morse 代码并在tinkercad上运行成功，以markdown格式总结学习收获|
+
+##二、国际双创实践周主要收获
+第一天：
+在Damo王的介绍下，认识了创客世界里爱玩者对开源硬件的热情与探索精神。并第一次接触并了解了arduino硬件及相关软件的用处。
+
+第二天：
+讲师讲解了arduino基础编程语言，并带领我们尝试运行了串口编程。并在本日晚要求学生应用所学，以arudino为基础达成从电脑串口接收字符，并转换为对应的morse代码，使得我们对该硬件有了进一步的认识。
+	#include <Morse.h>
+	
+	Morse morse(13);
+	
+	//定义莫尔斯电码表
+	char MORSE[][4] = {
+	{'.', '-', '*', '*'}, //A
+	{'-', '.', '.', '.'}, //B
+	{'-', '.', '-', '.'}, //C
+	{'-', '.', '.', '*'}, //D
+	{'.', '*', '*', '*'}, //E
+	{'.', '.', '-', '.'}, //F
+	{'-', '-', '.', '*'}, //G
+	{'.', '.', '.', '.'}, //H
+	{'.', '.', '*', '*'}, //I
+	{'.', '-', '-', '-'}, //J
+	{'-', '.', '-', '*'}, //K
+	{'.', '-', '.', '.'}, //L
+	{'-', '-', '*', '*'}, //M
+	{'-', '.', '*', '*'}, //N
+	{'-', '-', '-', '*'}, //O
+	{'.', '-', '-', '.'}, //P
+	{'-', '-', '.', '-'}, //Q
+	{'.', '-', '.', '*'}, //R
+	{'.', '.', '.', '*'}, //S
+	{'-', '*', '*', '*'}, //T
+	{'.', '.', '-', '*'}, //U
+	{'.', '.', '.', '-'}, //V
+	{'.', '-', '-', '*'}, //W
+	{'-', '.', '.', '-'}, //X
+	{'-', '.', '-', '-'}, //Y
+	{'-', '-', '.', '.'} //Z
+	};
+	
+	void setup()
+	{
+	Serial.begin(9600)；
+	}
+	
+	void loop()
+	{
+	String str = ""; //定义未转义字符串
+	String morse_s = ""; //定义转义后字符串
+	int i, t , temp = 0;
+	int n = 0; //对传入字符计数
+	while (Serial.available() > 0)
+	{
+	temp = 1; //判断是否有数据传入
+	str += char(Serial.read()); //将传入的数据储存在字符串中
+	delay(2); //延迟保证传入正常
+	n++;
+	}
+	
+	if (temp)
+	{
+	//查询Morse表并转换
+	for (i = 0; i < n; i++)
+	{
+	for (t = 0; t < 4; t++)
+	{
+	//判断是否为小写字母，如果是则转义
+	if (str[i] >= 97 && str[i] <= 122)
+	{
+	morse_s += char(MORSE[int(str[i] - 97)][t]);
+	}
+	}
+	//每段Morse后的空格
+	morse_s += ' ';
+	}
+	Serial.println(morse_s); //串口输入
+	for (i = 0; morse_s[i]!='\0' ; i++)//从头到尾读取电码
+	{
+	if (morse_s[i] == '.')morse.dot();
+	else if (morse_s[i] == '-')morse.dash();
+	else if (morse_s[i] == ' ')morse.w_space();
+	if (morse_s[i] != ' ' && str[i] != '*')morse.c_space();
+	}
+	Serial.println("发送成功");
+	delay(2);
+	}
+	}
+
+
+第三天：
+在群里互助伙伴的资源提供下，Damo王基于模拟仿真网站Tinkercad，讲解有关电机的使用、PWM技术的电路相关知识。并简介了数码管编程以及数字电路CD4511的原理（引脚及功能）。以理论讲解及模拟实践结合，使得课上内容更容易为我们领会。
+
+void setup() {
+	pinMode(2, OUTPUT);
+	pinMode(3, OUTPUT);
+	pinMode(4, OUTPUT);
+	pinMode(5, OUTPUT);
+	pinMode(6, OUTPUT);
+	Serial.begin(9600);
+	}
+	
+	void loop() 
+	{
+	digitalWrite(2,LOW);
+	digitalWrite(3,LOW);
+	digitalWrite(4,LOW);
+	digitalWrite(5,LOW);
+	digitalWrite(6,LOW);
+	int income;
+	if(Serial.available()>0）
+	{
+	income=Serial.read()-'0';
+	if((income&1)==1)
+	digitalWrite(2,HIGH);
+	if((income>>1&1)==1)
+	digitalWrite(3,HIGH);
+	if((income>>2&1)==1)
+	digitalWrite(4,HIGH);
+	if((income>>3&1)==1)
+	digitalWrite(5,HIGH); 
+	digitalWrite(6,HIGH);
+	delay(3000);
+	}
+	
+	}
+
+第四天：
+讲师要求我们以仿真的方式完善第一天内容，由库函数编写morse 代码相关程序改为用函数形式进行，并以余下时间进行答疑解惑环节，进一步解答同学们的疑惑，填补了知识漏洞。
+	#define DEBUG
+	
+	class MorseBase {
+	int _pin;
+	const int clk = 250;
+	
+	public:
+	MorseBase(int8_t pin) : _pin(pin) { pinMode(pin, OUTPUT); }
+	inline void dit() {
+	digitalWrite(_pin, HIGH);
+	delay(clk);
+	digitalWrite(_pin, LOW);
+	delay(clk);
+	#ifdef DEBUG
+	Serial.print('.');
+	#endif
+	}
+	inline void dah() {
+	digitalWrite(_pin, HIGH);
+	delay(clk * 3);
+	digitalWrite(_pin, LOW);
+	delay(clk);
+	#ifdef DEBUG
+	Serial.print('-');
+	#endif
+	}
+	inline void eoc() {
+	delay(clk << 1);
+	#ifdef DEBUG
+	Serial.print(' ');
+	#endif
+	}
+	inline void eow() {
+	delay((clk << 2) + (clk << 1));
+	#ifdef DEBUG
+	Serial.print("/");
+	#endif
+	}
+	};
+	
+	MorseBase x(13);
+	
+	bool isInitial = true;
+	char ch = 0;
+	
+	void setup() { Serial.begin(9600); }
+	
+	void loop() {
+	if (Serial.available() > 0) {
+	ch = Serial.read();
+	if (isUpperCase(ch))
+	ch |= 0x20u;
+	if (isInitial)
+	isInitial = false;
+	else if (ch != ' ')
+	x.eoc();
+	else {
+	isInitial = true;
+	x.eow();
+	}
+	switch (ch) {
+	case 'a': x.dit(); x.dah(); break;
+	case 'b': x.dah(); x.dit(); x.dit(); x.dit(); break;
+	case 'c': x.dah(); x.dit(); x.dah(); x.dit(); break;
+	case 'd': x.dah(); x.dit(); x.dit(); break;
+	case 'e': x.dit(); break;
+	case 'f': x.dit(); x.dit(); x.dah(); x.dit(); break;
+	case 'g': x.dah(); x.dah(); x.dit(); break;
+	case 'h': x.dit(); x.dit(); x.dit(); x.dit(); break;
+	case 'i': x.dit(); x.dit(); break;
+	case 'j': x.dit(); x.dah(); x.dah(); x.dah(); break;
+	case 'k': x.dah(); x.dit(); x.dah(); break;
+	case 'l': x.dit(); x.dah(); x.dit(); x.dit(); break;
+	case 'm': x.dah(); x.dah(); break;
+	case 'n': x.dah(); x.dit(); break;
+	case 'o': x.dah(); x.dah(); x.dah(); break;
+	case 'p': x.dit(); x.dah(); x.dah(); x.dit(); break;
+	case 'q': x.dah(); x.dah(); x.dit(); x.dah(); break;
+	case 'r': x.dit(); x.dah(); x.dit(); break;
+	case 's': x.dit(); x.dit(); x.dit(); x.dit(); break;
+	case 't': x.dah(); break;
+	case 'u': x.dit(); x.dit(); x.dah(); break;
+	case 'v': x.dit(); x.dit(); x.dit(); x.dah(); break;
+	case 'w': x.dit(); x.dah(); x.dah(); break;
+	case 'x': x.dah(); x.dit(); x.dit(); x.dah(); break;
+	case 'y': x.dah(); x.dit(); x.dah(); x.dah(); break;
+	case 'z': x.dah(); x.dah(); x.dit(); x.dit(); break;
+	case ',': x.dah(); x.dah(); x.dit(); x.dit(); x.dah(); x.dah(); break;
+	case '.': x.dit(); x.dah(); x.dit(); x.dah(); x.dit(); x.dah(); break;
+	case '?': x.dit(); x.dit(); x.dah(); x.dah(); x.dit(); x.dit(); break;
+	case '!': x.dit(); x.dit(); x.dah(); x.dah(); x.dit(); break;
+	case '\"': x.dit(); x.dah(); x.dit(); x.dit(); x.dah(); x.dit(); break;
+	case '\'': x.dit(); x.dah(); x.dah(); x.dah(); x.dah(); x.dit(); break;
+	case '-': x.dah(); x.dit(); x.dit();x.dit(); x.dit(); x.dah(); break;
+	case '0': x.dah(); x.dah(); x.dah(); x.dah(); x.dah(); break;
+	case '1': x.dit(); x.dah(); x.dah(); x.dah(); x.dah(); break;
+	case '2': x.dit(); x.dit(); x.dah(); x.dah(); x.dah(); break;
+	case '3': x.dit(); x.dit(); x.dit(); x.dah(); x.dah(); break;
+	case '4': x.dit(); x.dit(); x.dit(); x.dit(); x.dah(); break;
+	case '5': x.dit(); x.dit(); x.dit(); x.dit(); x.dit(); break;
+	case '6': x.dah(); x.dit(); x.dit(); x.dit(); x.dit(); break;
+	case '7': x.dah(); x.dah(); x.dit(); x.dit(); x.dit(); break;
+	case '8': x.dah(); x.dah(); x.dah(); x.dit(); x.dit(); break;
+	case '9': x.dah(); x.dah(); x.dah(); x.dah(); x.dit(); break;
+
+	}
+	}
+	}
+
+总结：
+身为软硬件代码界的小白，在选择这门课的时候内心不可不说很是忐忑。但讲师Damo王带我们认识了世界上创意硬件实战领域爱好者的一个个脑洞大开鲜活有趣的作品。无论是用塑料瓶做的机器人，亦或是一张纸的巧妙工程，从接地气到高科技。开课第一天便撞上三个从未听说过的软件，并在余下几节课中基于软件进行操作实践，在老师的指导下完成多次实验，提升了我们对开源硬件的兴趣。
+Damo王让我们相信，想法的代码需要编译成实践的程序，创意的三维曲线随时可以交织变幻，碰撞出独一无二的轮廓，我们是自己的米开朗基罗。
+
+##三、意见与建议
+由于国际双创周课程涵盖多个专业方向，参课者包括来自不同学院大一至大三的学子，对电路、编程、硬件等方面的基础层次不等，课程开展也难以兼顾，既影响了讲师授课进度及知识传授进程，又难免出现学生课程预期不等，学习收获不一的情况。
+为此，建议在课程开展及选课阶段，加入笔试面试等入课门槛，并设置层次不等的相应课程，以更好满足不同基础学生对开源硬件等类别课程的学习热情。
